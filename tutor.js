@@ -29,7 +29,20 @@ function getSample(){
   return sampleP;
 }
 getSample();
-function mode(){return getSample().then(function(s){return s?'claude':(W.SM_TUTOR_ENDPOINT?'proxy':'local')})}
+var CFG=Object.assign({name:'Tutor',prov:'auto',gKey:'',gModel:'gemini-3.8-flash',ep:'',oUrl:'',oKey:'',oModel:''},load('tutorCfg',{}));
+function saveCfg(){save('tutorCfg',CFG)}
+function tname(){return (CFG.name||'Tutor').trim().slice(0,24)||'Tutor'}
+function endpoint(){return CFG.ep||W.SM_TUTOR_ENDPOINT||''}
+function mode(){
+  var p=CFG.prov;
+  if(p==='gemini')return Promise.resolve(CFG.gKey?'gemini':'local');
+  if(p==='openai')return Promise.resolve(CFG.oUrl&&CFG.oModel?'openai':'local');
+  if(p==='proxy')return Promise.resolve(endpoint()?'proxy':'local');
+  if(p==='local')return Promise.resolve('local');
+  if(p==='claude')return getSample().then(function(s){return s?'claude':'local'});
+  return getSample().then(function(s){return s&&!CFG.claudeDenied?'claude':(endpoint()?'proxy':(CFG.gKey?'gemini':'local'))});
+}
+var MODE_N={claude:'Claude',proxy:'Puente propio',gemini:'Gemini',openai:'Proveedor compatible',local:'Ayuda de la academia (sin IA)'};
 
 /* ---------- contexto de la pantalla ---------- */
 function prog(){return load('prog2',{})}
@@ -74,8 +87,8 @@ function context(){
 function courseMap(){
   return MODS().map(function(m){return m.id+' '+m.title+' (#m-'+m.id+', examen #ex-'+m.id+'): '+m.lessons.map(function(l,i){return (i+1)+'. '+l.t+' #l-'+m.id+'-'+(i+1)}).join('; ')}).join('\n');
 }
-var SYS=[
-'Eres el Tutor de School Mind, la academia de JadeMind para personas que aprenden a vender por internet con dropshipping contraentrega en Colombia (plataformas Dropi, Mastershop y Effi).',
+function SYSF(){return [
+'Te llamas '+tname()+' y eres el tutor de School Mind, la academia de JadeMind para personas que aprenden a vender por internet con dropshipping contraentrega en Colombia (plataformas Dropi, Mastershop y Effi).',
 'Tu trabajo: que el estudiante no se quede perdido y avance. Explica con palabras sencillas, como a alguien que empieza, en español de Colombia y tuteando.',
 'Reglas:',
 '- Respuestas cortas: máximo 120 palabras. Si es un proceso, usa pasos numerados de una línea.',
@@ -88,12 +101,12 @@ var SYS=[
 'Acciones: puedes añadir al final hasta 2 botones con este formato exacto, cada uno en su línea:',
 '[[ir:#ruta|Texto del botón]] para llevarlo a otra pantalla (usa solo rutas del MAPA o #hoy, #ruta, #buscar, #glosario, #progreso, #constancias).',
 '[[ver:seccion|Texto del botón]] para mover la pantalla a una sección de la pantalla actual (solo las secciones listadas en el contexto).'
-].join('\n');
+].join('\n')}
 
 /* ---------- llamada al modelo ---------- */
 var hist=sload('tutorHist',[]);
 function buildPrompt(q){
-  return SYS+'\n\nMAPA DEL CURSO:\n'+courseMap()+'\n\nCONTEXTO DE LA PANTALLA:\n'+context()+'\n\nPregunta del estudiante: '+q;
+  return SYSF()+'\n\nMAPA DEL CURSO:\n'+courseMap()+'\n\nCONTEXTO DE LA PANTALLA:\n'+context()+'\n\nPregunta del estudiante: '+q;
 }
 function askModel(q,onText){
   return mode().then(function(md){
@@ -103,8 +116,22 @@ function askModel(q,onText){
       if(msgs[0].role!=='user')msgs.shift();
       return s(msgs,{onText:function(e){onText(e.text)},modelTier:'quick',cache:false}).then(function(r){return r.text});
     });
-    if(md==='proxy')return fetch(W.SM_TUTOR_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({system:SYS+'\n\nMAPA DEL CURSO:\n'+courseMap(),messages:past.concat([{role:'user',content:'CONTEXTO DE LA PANTALLA:\n'+context()+'\n\nPregunta: '+q}])})})
+    if(md==='gemini'){
+      var gc=past.concat([{role:'user',content:'CONTEXTO DE LA PANTALLA:\n'+context()+'\n\nPregunta: '+q}]).map(function(m){return {role:m.role==='assistant'?'model':'user',parts:[{text:m.content}]}});
+      return fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(CFG.gModel||'gemini-3.8-flash')+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':CFG.gKey},
+        body:JSON.stringify({systemInstruction:{parts:[{text:SYSF()+'\n\nMAPA DEL CURSO:\n'+courseMap()}]},contents:gc,generationConfig:{temperature:0.4,maxOutputTokens:700}})})
+        .then(function(r){if(!r.ok)throw {code:r.status===429?'rate_limited':'http_'+r.status};return r.json()})
+        .then(function(j){return ((j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts)||[]).map(function(p){return p.text||''}).join('')});
+    }
+    if(md==='openai'){
+      var om=[{role:'system',content:SYSF()+'\n\nMAPA DEL CURSO:\n'+courseMap()}].concat(past,[{role:'user',content:'CONTEXTO DE LA PANTALLA:\n'+context()+'\n\nPregunta: '+q}]);
+      var hd={'Content-Type':'application/json'};if(CFG.oKey)hd.Authorization='Bearer '+CFG.oKey;
+      return fetch(CFG.oUrl.replace(/\/+$/,'')+'/chat/completions',{method:'POST',headers:hd,body:JSON.stringify({model:CFG.oModel,messages:om,temperature:0.4,max_tokens:700})})
+        .then(function(r){if(!r.ok)throw {code:r.status===429?'rate_limited':'http_'+r.status};return r.json()})
+        .then(function(j){return (j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content)||''});
+    }
+    if(md==='proxy')return fetch(endpoint(),{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({system:SYSF()+'\n\nMAPA DEL CURSO:\n'+courseMap(),messages:past.concat([{role:'user',content:'CONTEXTO DE LA PANTALLA:\n'+context()+'\n\nPregunta: '+q}])})})
       .then(function(r){if(!r.ok)throw {code:'http_'+r.status};return r.json()}).then(function(j){return j.text||''});
     return Promise.resolve(localAnswer(q));
   });
@@ -151,7 +178,7 @@ var css=[
 '.tutor-fab.dragging{cursor:grabbing;box-shadow:0 18px 44px rgba(0,0,0,.35)}',
 '.tutor-fab .grip{width:6px;height:16px;background-image:radial-gradient(circle,rgba(255,255,255,.55) 1px,transparent 1.4px);background-size:6px 5px;margin-left:2px}',
 '.tutor-panel{position:fixed;z-index:61;width:min(400px,calc(100vw - 24px));height:min(600px,calc(100vh - 32px));display:flex;flex-direction:column;background:#fff;border:1px solid #E1E8E5;border-radius:22px;box-shadow:0 24px 64px rgba(0,0,0,.22);overflow:hidden;font-family:Poppins,system-ui,sans-serif;color:var(--ink,#20282F)}',
-'.tutor-panel[hidden]{display:none}',
+'.tutor-panel[hidden],.tutor-panel [hidden]{display:none!important}',
 '.tutor-head{display:flex;align-items:center;gap:10px;padding:14px 14px 12px 18px;border-bottom:1px solid #E6EDEA;cursor:grab;touch-action:none}',
 '.tutor-head h2{font-size:16px;margin:0;flex:1}.tutor-head small{display:block;font-weight:500;font-size:12px;color:var(--soft,#3F4A53)}',
 '.tutor-head button{border:0;background:var(--mist,#F2F5F4);border-radius:10px;min-width:40px;height:40px;font:600 13px Poppins,sans-serif;color:var(--ink,#20282F);cursor:pointer;padding:0 10px}',
@@ -166,6 +193,14 @@ var css=[
 '.tnote{font-size:11.5px;color:var(--soft,#3F4A53);padding:0 16px 10px;margin:0}',
 '.typing{display:inline-flex;gap:4px}.typing i{width:6px;height:6px;border-radius:50%;background:#9AA7A1;animation:tb 1s infinite}.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}@keyframes tb{0%,60%,100%{opacity:.3}30%{opacity:1}}',
 '.tutor-flash{outline:3px solid var(--jade,#05AB6C);outline-offset:6px;border-radius:18px;transition:outline-color .6s}',
+'.tset{flex:1;overflow:auto;padding:16px 18px;display:flex;flex-direction:column;gap:14px;font-size:14px}.tset[hidden]{display:none}',
+'.tset h3{font-size:15px;margin:0}.tset p{margin:0;color:var(--soft,#3F4A53);font-size:13px;line-height:1.45}',
+'.tset label{display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:13px}.tset input[type=text],.tset input[type=password],.tset input[type=url]{border:1px solid #D6E0DB;border-radius:12px;padding:10px 12px;font:15px Poppins,sans-serif}',
+'.tset fieldset{border:1px solid #E1E8E5;border-radius:16px;padding:12px 14px;margin:0;display:flex;flex-direction:column;gap:10px}.tset legend{font-weight:600;padding:0 6px}',
+'.tset .opt{flex-direction:row!important;align-items:flex-start;gap:10px!important;font-weight:500!important}.tset .opt input{margin-top:3px;accent-color:var(--jade,#05AB6C)}.tset .opt b{display:block}.tset .opt span small{display:block;color:var(--soft,#3F4A53);font-weight:400}',
+'.tset .sub{display:none;flex-direction:column;gap:8px;padding:4px 0 2px 26px}.tset .sub.on{display:flex}',
+'.tset .row{display:flex;gap:8px;flex-wrap:wrap}.tset .b{border:0;border-radius:12px;padding:10px 14px;font:600 13px Poppins,sans-serif;cursor:pointer;background:var(--mist,#F2F5F4);color:var(--ink,#20282F)}.tset .b.p{background:var(--night,#1A1F24);color:#fff}.tset .b.j{background:var(--jade,#05AB6C);color:#20282F}',
+'.tset .st{font-size:13px;padding:8px 12px;border-radius:10px;background:var(--mist,#F2F5F4)}.tset .st.ok{background:var(--jade-pale,#DCF2E7)}.tset .st.no{background:#FDE8E4}',
 'body.m-land .tutor-fab,body.m-land .tutor-panel{display:none}',
 '@media (max-width:860px){.tutor-fab .lbl{display:none}.tutor-fab{padding:10px}.tutor-panel{left:8px!important;right:8px!important;top:auto!important;bottom:8px!important;width:auto;height:min(82vh,640px);border-radius:22px}.tutor-head{cursor:default}}',
 '@media (prefers-reduced-motion:reduce){.typing i{animation:none}}'
@@ -174,11 +209,11 @@ var st=D.createElement('style');st.textContent=css;D.head.appendChild(st);
 
 var ICON='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.4 2.3c-.6.3-.9.8-.9 1.4V14"/><path d="M12 17h.01"/></svg>';
 var fab=D.createElement('button');fab.type='button';fab.className='tutor-fab';fab.setAttribute('aria-haspopup','dialog');fab.setAttribute('aria-expanded','false');
-fab.setAttribute('aria-label','Abrir el tutor. Puedes arrastrar este botón a cualquier lugar.');
+fab.setAttribute('aria-label','Abrir a '+tname()+', el tutor. Puedes arrastrar este botón a cualquier lugar.');
 fab.innerHTML='<span class="dot">'+ICON+'</span><span class="lbl">¿Te ayudo?</span><span class="grip" aria-hidden="true"></span>';
-var panel=D.createElement('section');panel.className='tutor-panel';panel.hidden=true;panel.setAttribute('role','dialog');panel.setAttribute('aria-label','Tutor de School Mind');
-panel.innerHTML='<div class="tutor-head"><h2>Tutor<small id="tMode">Tu ayuda en cada paso</small></h2><button type="button" id="tClear" title="Empezar de nuevo">Nuevo</button><button type="button" id="tClose" aria-label="Cerrar tutor">✕</button></div>'+
- '<div class="tutor-log" id="tLog" aria-live="polite"></div><div class="tchips" id="tChips"></div>'+
+var panel=D.createElement('section');panel.className='tutor-panel';panel.hidden=true;panel.setAttribute('role','dialog');panel.setAttribute('aria-label',tname()+', tutor de School Mind');
+panel.innerHTML='<div class="tutor-head"><h2><span id="tName">'+esc(tname())+'</span><small id="tMode">Tu ayuda en cada paso</small></h2><button type="button" id="tSet" aria-expanded="false" title="Nombre y modelo de IA">Ajustes</button><button type="button" id="tClear" title="Empezar de nuevo">Nuevo</button><button type="button" id="tClose" aria-label="Cerrar tutor">✕</button></div>'+
+ '<div class="tset" id="tSetBox" hidden></div><div class="tutor-log" id="tLog" aria-live="polite"></div><div class="tchips" id="tChips"></div>'+
  '<form class="tform" id="tForm"><label class="sr" for="tIn" style="position:absolute;left:-9999px">Escribe tu pregunta</label><textarea id="tIn" rows="1" placeholder="Escribe tu duda…"></textarea><button type="submit" id="tSend">Enviar</button></form>'+
  '<p class="tnote" id="tNote">El tutor puede equivocarse. Confirma los datos importantes en la plataforma.</p>';
 function mount(){D.body.appendChild(fab);D.body.appendChild(panel);requestAnimationFrame(place);if(D.fonts&&D.fonts.ready)D.fonts.ready.then(place);setTimeout(place,600);renderLog();}
@@ -218,16 +253,63 @@ panel.addEventListener('pointerdown',function(e){if(isNarrow()||!e.target.closes
 panel.addEventListener('pointermove',function(e){if(!hd)return;ppos={x:hd.ox+e.clientX-hd.sx,y:hd.oy+e.clientY-hd.sy};placePanel()});
 panel.addEventListener('pointerup',function(){hd=null});
 
+function setHTML(){
+  var c=CFG,ck=function(v){return c.prov===v?' checked':''},on=function(v){return c.prov===v?' on':''};
+  return '<h3>Ajustes del tutor</h3>'+
+  '<label>Nombre del tutor<input type="text" id="sName" maxlength="24" value="'+esc(c.name)+'" placeholder="Ej.: Jade, Profe Ana, Mentor"></label>'+
+  '<fieldset><legend>Modelo de inteligencia artificial</legend>'+
+  '<label class="opt"><input type="radio" name="sProv" value="auto"'+ck('auto')+'><span><b>Automático</b><small>Usa Claude si está disponible; si no, el puente o tu clave de Gemini; si no, la ayuda de la academia.</small></span></label>'+
+  '<label class="opt"><input type="radio" name="sProv" value="claude"'+ck('claude')+'><span><b>Claude</b><small>Funciona dentro de la página de Claude. Te pide un permiso la primera vez.</small></span></label>'+
+  '<div class="sub'+(c.prov==='claude'||c.prov==='auto'?' on':'')+'" data-for="claude auto"><div class="row"><button type="button" class="b p" id="sClaude">Conectar Claude</button></div><p class="st" id="sClaudeSt">Toca "Conectar Claude" para pedir el permiso de nuevo.</p></div>'+
+  '<label class="opt"><input type="radio" name="sProv" value="gemini"'+ck('gemini')+'><span><b>Gemini (gratis con tu clave)</b><small>Crea una clave gratis en aistudio.google.com. Se guarda solo en este navegador.</small></span></label>'+
+  '<div class="sub'+on('gemini')+'" data-for="gemini"><label>Clave de API<input type="password" id="sGKey" autocomplete="off" value="'+esc(c.gKey)+'" placeholder="AIza…"></label><label>Modelo<input type="text" id="sGModel" value="'+esc(c.gModel)+'"></label></div>'+
+  '<label class="opt"><input type="radio" name="sProv" value="proxy"'+ck('proxy')+'><span><b>Puente propio</b><small>La URL del puente de tu academia (la clave queda en el servidor).</small></span></label>'+
+  '<div class="sub'+on('proxy')+'" data-for="proxy"><label>URL del puente<input type="url" id="sEp" value="'+esc(c.ep||W.SM_TUTOR_ENDPOINT||'')+'" placeholder="https://…workers.dev"></label></div>'+
+  '<label class="opt"><input type="radio" name="sProv" value="openai"'+ck('openai')+'><span><b>Otra herramienta de IA</b><small>Cualquier servicio compatible con OpenAI (OpenRouter, Groq, Ollama…).</small></span></label>'+
+  '<div class="sub'+on('openai')+'" data-for="openai"><label>URL base<input type="url" id="sOUrl" value="'+esc(c.oUrl)+'" placeholder="https://openrouter.ai/api/v1"></label><label>Modelo<input type="text" id="sOModel" value="'+esc(c.oModel)+'"></label><label>Clave (si la pide)<input type="password" id="sOKey" autocomplete="off" value="'+esc(c.oKey)+'"></label></div>'+
+  '<label class="opt"><input type="radio" name="sProv" value="local"'+ck('local')+'><span><b>Sin IA</b><small>Solo la ayuda de la academia: tu tarea pendiente y lecciones relacionadas.</small></span></label>'+
+  '</fieldset><p>No escribas contraseñas ni datos personales en el tutor.</p>'+
+  '<div class="row"><button type="button" class="b j" id="sSave">Guardar</button><button type="button" class="b" id="sTest">Probar conexión</button><button type="button" class="b" id="sBack">Volver al chat</button></div><p class="st" id="sMsg" hidden></p>';
+}
+function showSet(on){var b=$('#tSetBox');b.hidden=!on;$('#tLog').hidden=on;$('#tChips').hidden=on;$('#tForm').hidden=on;$('#tSet').setAttribute('aria-expanded',on?'true':'false');$('#tSet').textContent=on?'Chat':'Ajustes';
+  if(on){b.innerHTML=setHTML();$('#sName').focus()}}
+function readSet(){
+  var r=$('input[name=sProv]:checked');CFG.prov=r?r.value:'auto';
+  CFG.name=($('#sName').value||'Tutor').trim().slice(0,24);
+  CFG.gKey=$('#sGKey').value.trim();CFG.gModel=$('#sGModel').value.trim()||'gemini-3.8-flash';
+  CFG.ep=$('#sEp').value.trim();CFG.oUrl=$('#sOUrl').value.trim();CFG.oModel=$('#sOModel').value.trim();CFG.oKey=$('#sOKey').value.trim();
+  if(CFG.prov==='claude')CFG.claudeDenied=false;
+  saveCfg();$('#tName').textContent=tname();panel.setAttribute('aria-label',tname()+', tutor de School Mind');updMode();
+}
+function smsg(t,ok){var m=$('#sMsg');m.hidden=false;m.textContent=t;m.className='st '+(ok?'ok':'no')}
+function connectClaude(){
+  var st=$('#sClaudeSt');st.className='st';st.textContent='Pidiendo el permiso…';
+  getSample().then(function(s){
+    if(!s){st.className='st no';st.textContent='Claude solo está disponible cuando abres la academia desde su enlace de Claude. Aquí usa Gemini, un puente u otra herramienta.';return}
+    return s('Responde solo con la palabra: listo',{modelTier:'quick',cache:false}).then(function(){CFG.claudeDenied=false;if(CFG.prov==='local')CFG.prov='auto';saveCfg();updMode();st.className='st ok';st.textContent='Claude está conectado.'},
+      function(e){st.className='st no';st.textContent=e&&e.code==='not_granted'?'El permiso sigue sin aceptarse. Recarga la página y toca de nuevo "Conectar Claude": cuando Claude te pregunte, elige permitir. Si no vuelve a preguntar, usa Gemini u otra opción de abajo.':(e&&e.code==='rate_limited'?'Claude está ocupado. Intenta en un minuto.':'No se pudo conectar ahora. Intenta de nuevo.')});
+  });
+}
+function testConn(){readSet();smsg('Probando…',true);var saved=hist;hist=[];
+  askModel('Responde solo: conexión lista',function(){}).then(function(t){hist=saved;mode().then(function(m){smsg(m==='local'?'Estás en modo sin IA. Elige un modelo para usar inteligencia artificial.':'Funciona con '+MODE_N[m]+'.',m!=='local')})},
+    function(e){hist=saved;smsg('No funcionó ('+(e&&e.code||'error')+'). Revisa la clave, la URL o el modelo.',false)});
+}
+panel.addEventListener('change',function(e){if(e.target.name!=='sProv')return;[].forEach.call(panel.querySelectorAll('.tset .sub'),function(d){d.classList.toggle('on',d.dataset.for.split(' ').indexOf(e.target.value)>=0)})});
 function open(){panel.hidden=false;fab.setAttribute('aria-expanded','true');placePanel();renderChips();updMode();if(!hist.length)greet();setTimeout(function(){$('#tIn').focus()},30)}
 function close(){panel.hidden=true;fab.setAttribute('aria-expanded','false');fab.focus()}
 D.addEventListener('keydown',function(e){if(e.key==='Escape'&&!panel.hidden)close()});
 panel.addEventListener('click',function(e){
   if(e.target.id==='tClose')close();
+  if(e.target.id==='tSet')showSet($('#tSetBox').hidden);
+  if(e.target.id==='sBack')showSet(false);
+  if(e.target.id==='sSave'){readSet();smsg('Guardado. Ahora te atiende '+tname()+'.',true)}
+  if(e.target.id==='sTest')testConn();
+  if(e.target.id==='sClaude')connectClaude();
   if(e.target.id==='tClear'){hist=[];ssave('tutorHist',hist);renderLog();greet()}
   var a=e.target.closest('[data-act]');if(a)doAction(JSON.parse(a.dataset.act));
   var c=e.target.closest('[data-q]');if(c)send(c.dataset.q);
 });
-function updMode(){mode().then(function(m){$('#tMode').textContent=m==='local'?'Ayuda de la academia':'Con inteligencia artificial'})}
+function updMode(){mode().then(function(m){$('#tMode').textContent=m==='local'?'Ayuda de la academia · sin IA':'Con IA · '+MODE_N[m]})}
 addEventListener('hashchange',function(){if(!panel.hidden)renderChips()});
 
 function chips(){
@@ -239,7 +321,7 @@ function chips(){
   return c;
 }
 function renderChips(){$('#tChips').innerHTML=chips().map(function(q){return '<button type="button" data-q="'+esc(q)+'">'+esc(q)+'</button>'}).join('')}
-function greet(){var u=load('user',null);var n=u&&u.name?' '+u.name.split(' ')[0]:'';addMsg('a','Hola'+n+'. Soy tu tutor. Puedo explicarte la lección que tienes en pantalla, guiarte en tu práctica clic a clic o decirte qué sigue. Puedes arrastrar mi botón a donde te estorbe menos.',false)}
+function greet(){var u=load('user',null);var n=u&&u.name?' '+u.name.split(' ')[0]:'';addMsg('a','Hola'+n+'. Soy '+tname()+', tu tutor. Puedo explicarte la lección que tienes en pantalla, guiarte en tu práctica clic a clic o decirte qué sigue. Puedes arrastrar mi botón a donde te estorbe menos. En "Ajustes" puedes cambiar mi nombre o el modelo de IA.',false)}
 function msgHTML(m){var p=m.r==='a'?parseActions(m.t):{body:m.t,acts:[]};
   return '<div class="tmsg '+m.r+'">'+(m.r==='a'?fmt(p.body):'<p>'+esc(p.body)+'</p>')+(p.acts.length?'<div class="tacts">'+p.acts.map(function(a){return '<button type="button" data-act=\''+esc(JSON.stringify(a))+'\'>'+esc(a.label)+'</button>'}).join('')+'</div>':'')+'</div>'}
 function renderLog(){var L=$('#tLog');if(!L)return;L.innerHTML=hist.map(msgHTML).join('');L.scrollTop=L.scrollHeight}
@@ -255,7 +337,8 @@ function send(q){
   askModel(q,function(txt){if(live&&txt&&txt!=='Thinking...'){live.innerHTML=fmt(parseActions(txt).body);L.scrollTop=L.scrollHeight}})
   .then(function(t){live.remove();addMsg('a',t||'No tengo una respuesta ahora. Intenta preguntarlo de otra forma.')},
    function(err){live.remove();var c=err&&err.code;
-     addMsg('a',c==='not_granted'?'Para usar el tutor con IA, acepta el permiso que te pide Claude. Mientras tanto:\n'+localAnswer(q):
+     if(c==='not_granted'){CFG.claudeDenied=true;saveCfg();updMode()}
+     addMsg('a',c==='not_granted'?'No tengo permiso para usar Claude. Para activarlo toca "Ajustes" (arriba) → "Conectar Claude", o elige otro modelo. Mientras tanto:\n'+localAnswer(q):
        c==='rate_limited'?'Hiciste muchas preguntas seguidas. Espera un minuto y vuelve a intentarlo.':localAnswer(q))})
   .then(function(){busy=false;$('#tSend').disabled=false});
 }
