@@ -648,6 +648,64 @@ a.r:hover>.ic{transform:translateX(3px);color:var(--ink)}
 .pok{margin:10px 12px 0 46px!important;padding:8px 12px;border-left:3px solid var(--jade);font-size:var(--t-s);color:#fff!important;background:rgba(255,255,255,.04);border-radius:0 8px 8px 0}
 .pok b{color:var(--jade)}
 @media (max-width:560px){.clicks,.pok{margin-left:12px!important}}
+.mrib{position:sticky;top:0;z-index:15;background:#fff;border-bottom:1px solid #E6EDEA;margin:-28px -40px 24px;padding:10px 40px}
+.mrib.static{position:relative}
+.mrib-in{display:flex;align-items:center;gap:10px}
+.mrib-route{flex:none;display:flex;align-items:center;gap:8px;min-height:44px;padding:4px 14px 4px 10px;border-radius:12px;background:var(--mist);color:var(--ink);text-decoration:none;font-weight:600;font-size:14px;line-height:1.15}
+.mrib-route small{display:block;font-size:11.5px;font-weight:500;color:var(--soft)}
+.mrib-route:hover{background:var(--mist-2)}
+.mrib-list{flex:1;min-width:0;display:flex;gap:6px;overflow-x:auto;list-style:none;margin:0;padding:3px 2px;scrollbar-width:thin;scroll-behavior:smooth}
+.mc{display:flex;align-items:center;gap:8px;height:42px;padding:0 14px 0 6px;border-radius:999px;border:1px solid #DDE6E2;background:#fff;color:var(--ink);text-decoration:none;font-size:13.5px;font-weight:500;white-space:nowrap;transition:background-color .15s,border-color .15s}
+.mc:hover{background:var(--mist)}
+.mc-n{width:30px;height:30px;flex:none;border-radius:50%;display:grid;place-items:center;background:var(--mist);font-weight:600;font-size:13px}
+.mc-n .ic{width:16px;height:16px}
+.mc-t{max-width:150px;overflow:hidden;text-overflow:ellipsis}
+.mc.s-ok .mc-n{background:var(--jade-pale);color:var(--jade-deep)}
+.mc.s-now{border-color:var(--jade)}
+.mc.cur{background:var(--night);border-color:var(--night);color:#fff;font-weight:600}
+.mc.cur .mc-n{background:var(--jade);color:var(--ink)}
+.mc.cur .mc-t{max-width:300px}
+.mrib-all{flex:none;display:flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border:1px solid #DDE6E2;border-radius:12px;background:#fff;font:inherit;font-size:14px;font-weight:600;color:var(--ink);cursor:pointer}
+.mrib-all[aria-expanded="true"]{background:var(--night);color:#fff;border-color:var(--night)}
+.mrib-pop{position:absolute;right:40px;top:calc(100% + 6px);width:min(560px,calc(100% - 32px));max-height:min(70vh,640px);overflow:auto;background:#fff;border:1px solid #DDE6E2;border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,.16);padding:8px 8px 12px;z-index:16}
+.mp-h{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 10px 12px;border-bottom:1px solid #E6EDEA;margin-bottom:6px}
+.mp-c{display:flex;gap:4px;background:var(--mist);border-radius:10px;padding:3px}
+.mp-c a{padding:6px 10px;border-radius:8px;font-size:13px;font-weight:600;color:var(--soft);text-decoration:none}
+.mp-c a.on{background:#fff;color:var(--ink)}
+.mp-list{list-style:none;margin:0;padding:0}
+.mp-list summary{display:flex;align-items:center;gap:12px;padding:10px;border-radius:12px;cursor:pointer;list-style:none}
+.mp-list summary::-webkit-details-marker{display:none}
+.mp-list summary:hover{background:var(--mist)}
+.mp-list summary .r-main{flex:1;min-width:0}
+.mp-list summary b{display:block;font-size:14.5px}
+.mp-list summary small{color:var(--soft);font-size:12.5px}
+.mp-list details[open] summary{background:var(--mist)}
+.mp-list ul{list-style:none;margin:4px 0 8px 22px;padding:0 0 0 18px;border-left:2px solid #E1E8E5}
+.mp-list ul a{display:flex;align-items:center;gap:10px;min-height:40px;padding:4px 10px;border-radius:10px;color:var(--ink);text-decoration:none;font-size:14px}
+.mp-list ul a:hover{background:var(--mist)}
+.mp-list ul a.here{background:var(--jade-pale);font-weight:600}
+.mp-list ul .ic{width:18px;height:18px;color:var(--jade-deep);flex:none}
+.mp-list .nn{width:20px;height:20px;flex:none;border-radius:50%;background:var(--mist-2);display:grid;place-items:center;font-size:11px;font-weight:600}
+.lesson-rail{top:88px}
+.stree{margin:2px 0 6px 22px;padding-left:10px;border-left:2px solid #DCE5E1}
+.stree[hidden]{display:none}
+.stree ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1px}
+.stree a{display:flex;align-items:center;gap:8px;min-height:34px;padding:0 8px;border-radius:8px;color:var(--soft);text-decoration:none;font-size:13.5px;font-weight:500}
+.stree a:hover{background:#E2EAE7;color:var(--ink)}
+.stree a.cur{background:#fff;color:var(--ink);font-weight:600}
+.stree .tn{width:22px;height:22px;flex:none;border-radius:50%;display:grid;place-items:center;background:#DCE5E1;font-size:11.5px;font-weight:600;color:var(--ink)}
+.stree .tn .ic{width:13px;height:13px}
+.stree a.st-ok .tn{background:var(--jade-pale);color:var(--jade-deep)}
+.stree a.st-now .tn{box-shadow:inset 0 0 0 2px var(--jade)}
+.stree a.cur .tn{background:var(--night);color:#fff}
+.stree .tt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:860px){
+  .mrib{top:56px;margin:-18px -16px 16px;padding:8px 12px}
+  .mrib-route{padding:4px 10px}.mrib-route span{display:none}
+  .mrib-all span{display:none}.mrib-all{padding:0 12px}
+  .mc-t{max-width:110px}.mc.cur .mc-t{max-width:190px}
+  .mrib-pop{position:fixed;left:8px;right:8px;top:118px;width:auto;max-height:calc(100vh - 200px)}
+}
 </style>
 </head>
 <body class="m-land">
@@ -716,6 +774,7 @@ a.r:hover>.ic{transform:translateX(3px);color:var(--ink)}
     <nav class="snav" aria-label="Aprender">
       <a href="#hoy" data-nav="hoy"><svg class="ic" aria-hidden="true"><use href="#i-home"/></svg>Hoy</a>
       <a href="#ruta" data-nav="ruta"><svg class="ic" aria-hidden="true"><use href="#i-route"/></svg>Mi ruta</a>
+      <div class="stree" id="sTree" hidden></div>
       <a href="#buscar" data-nav="buscar"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg>Buscar</a>
       <a href="#glosario" data-nav="glosario"><svg class="ic" aria-hidden="true"><use href="#i-book"/></svg>Glosario</a>
       <p class="sgroup">Tus logros</p>
@@ -938,12 +997,44 @@ function pill(kind,txt){return '<span class="pill p-'+kind+'">'+txt+'</span>'}
 function modState(m){if(passed(m))return ['ok','Aprobado'];if(lessonsDone(m)>0||P.exams[m.id])return ['go','En curso'];return ['no','Sin empezar']}
 function stateIcon(s){return '<span class="dot d-'+s+'" aria-hidden="true">'+(s==='ok'?ic('i-check'):s==='lock'?ic('i-lock'):'')+'</span>'}
 
+function shortT(m){var t=m.title.split(':')[0];return t.length>34?t.slice(0,32)+'…':t}
+function curModFromHash(){var h=location.hash.match(/^#(?:m|ex|c|l)-([pia]\d\d)/);return h?mod(h[1]):null}
+function modRibbon(m,ctx){
+  ctx=ctx||{};var c=course(m.course),ms=courseMods(m.course),cm=courseNext(m.course);
+  var h='<nav class="mrib'+(ctx.static?' static':'')+'" aria-label="Módulos del curso '+c.name+'"><div class="mrib-in">';
+  h+='<a class="mrib-route" href="#ruta-'+c.id+'" aria-label="Volver a Mi ruta, curso '+c.name+'">'+ic('i-route')+'<span><small>Curso '+c.name+'</small>Mi ruta</span></a>';
+  h+='<ol class="mrib-list">'+ms.map(function(x,i){var st=passed(x)?'ok':(x===cm?'now':'no'),cur=x===m;
+    return '<li><a class="mc s-'+st+(cur?' cur':'')+'" href="#m-'+x.id+'" title="Módulo '+(i+1)+': '+esc(x.title)+(st==='ok'?' (aprobado)':'')+'"'+(cur?' aria-current="page"':'')+'><span class="mc-n">'+(st==='ok'?ic('i-check'):(i+1))+'</span><span class="mc-t">'+esc(shortT(x))+(cur&&ctx.lesson?' · L'+ctx.lesson+'/'+x.lessons.length:'')+(cur&&ctx.exam?' · Examen':'')+'</span></a></li>'}).join('')+'</ol>';
+  h+='<button type="button" class="mrib-all" aria-expanded="false" aria-controls="mribPop" aria-label="Ver todos los módulos y lecciones">'+ic('i-menu')+'<span>Todos los módulos</span></button></div>';
+  h+='<div class="mrib-pop" id="mribPop" hidden><div class="mp-h"><b>Curso '+c.name+' · '+ms.length+' módulos</b><div class="mp-c">'+C.map(function(x){return '<a href="#ruta-'+x.id+'"'+(x.id===c.id?' class="on" aria-current="true"':'')+'>'+x.name+'</a>'}).join('')+'</div></div><ol class="mp-list">';
+  ms.forEach(function(x,i){var st=passed(x)?'ok':(x===cm?'now':'no'),cur=x===m;
+    h+='<li><details'+(cur?' open':'')+'><summary>'+stateIcon(st)+'<span class="r-main"><b>'+(i+1)+'. '+esc(x.title)+'</b><small>'+lessonsDone(x)+' de '+x.lessons.length+' lecciones'+(P.exams[x.id]?' · examen '+P.exams[x.id].best+' %':'')+'</small></span>'+(cur?pill('now','Estás aquí'):'')+'</summary><ul>'+
+      '<li><a href="#m-'+x.id+'"><b>Ver el módulo</b></a></li>'+
+      x.lessons.map(function(l,j){var d=P.lessons[lkey(x,j+1)],here=cur&&ctx.lesson===j+1;return '<li><a href="#l-'+x.id+'-'+(j+1)+'"'+(here?' aria-current="page" class="here"':'')+'>'+(d?ic('i-check'):'<span class="nn">'+(j+1)+'</span>')+esc(l.t)+'</a></li>'}).join('')+
+      '<li><a href="#ex-'+x.id+'"'+(cur&&ctx.exam?' aria-current="page" class="here"':'')+'>'+(passed(x)?ic('i-check'):'<span class="nn">E</span>')+'Examen del módulo</a></li></ul></details></li>'});
+  h+='</ol></div></nav>';return h;
+}
+function wireRib(){
+  var r=app.querySelector('.mrib');if(!r)return;var b=r.querySelector('.mrib-all'),pop=r.querySelector('.mrib-pop'),cur=r.querySelector('.mc.cur'),lst=r.querySelector('.mrib-list');
+  if(cur&&lst){var pv=cur.parentNode.previousElementSibling,tg=(pv?pv.firstChild:cur);if(pv&&cur.offsetLeft+cur.offsetWidth-tg.offsetLeft>lst.clientWidth-8)tg=cur;lst.style.scrollBehavior='auto';lst.scrollLeft=Math.max(0,tg.offsetLeft-lst.offsetLeft-4);lst.style.scrollBehavior=''}
+  function set(o){pop.hidden=!o;b.setAttribute('aria-expanded',o?'true':'false');if(o){var d=pop.querySelector('details[open]');if(d)d.scrollIntoView({block:'nearest'})}}
+  b.addEventListener('click',function(e){e.stopPropagation();set(pop.hidden)});
+  document.addEventListener('click',function out(e){if(!document.body.contains(r)){document.removeEventListener('click',out);return}if(!pop.hidden&&!pop.contains(e.target))set(false)});
+  document.addEventListener('keydown',function esck(e){if(!document.body.contains(r)){document.removeEventListener('keydown',esck);return}if(e.key==='Escape'&&!pop.hidden){set(false);b.focus()}});
+}
+function renderTree(){
+  var t=document.getElementById('sTree');if(!t)return;var cm0=curModFromHash(),onRoute=/^#(ruta|m-|l-|ex-|c-)/.test(location.hash);
+  if(!onRoute){t.hidden=true;t.innerHTML='';return}
+  var cid=cm0?cm0.course:curCourse(),ms=courseMods(cid),nx=courseNext(cid);t.hidden=false;
+  t.innerHTML='<ol>'+ms.map(function(x,i){var st=passed(x)?'ok':(x===nx?'now':'no'),cur=x===cm0;return '<li><a href="#m-'+x.id+'" class="st-'+st+(cur?' cur':'')+'"'+(cur?' aria-current="page"':'')+' title="'+esc(x.title)+'"><span class="tn">'+(st==='ok'?ic('i-check'):(i+1))+'</span><span class="tt">'+esc(shortT(x))+'</span></a></li>'}).join('')+'</ol>';
+}
 function renderSide(nav){
   var sc=document.getElementById('sCourse'),sp=document.getElementById('sPlat');
   if(sc)sc.value=curCourse();if(sp)sp.value=PLAT;
   var u=document.getElementById('sUser');if(u)u.innerHTML=ic('i-user')+'<span>'+(user?esc(user.name.split(' ')[0])+' · Perfil':'Crear mi cuenta')+'</span>';if(u)u.setAttribute('href',user?'#perfil':'#unete');
   var cc=document.getElementById('sCerts');if(cc)cc.textContent=M.filter(passed).length||'';
   [].forEach.call(document.querySelectorAll('[data-nav]'),function(a){if(a.dataset.nav===nav)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
+  renderTree();
 }
 function wireSide(){
   var sc=document.getElementById('sCourse'),sp=document.getElementById('sPlat');
@@ -1006,12 +1097,12 @@ function stepList(m,cur,compact){return '<ol class="steps'+(compact?' compact':'
     return '<li>'+(it.href?'<a class="r'+(cur===it.id?' cur':'')+'" href="'+it.href+'"'+(cur===it.id?' aria-current="step"':'')+'>'+inner+'</a>':'<span class="r off">'+inner+'</span>')+'</li>'}).join('')+'</ol>'}
 function vModule(id){
   var m=mod(id);if(!m)return vRoute();if(P.course!==m.course){P.course=m.course;persist()}var c=course(m.course),pos=modPos(m),nx=modNext(m),done=lessonsDone(m);
-  var h=pageHead({back:['#ruta-'+c.id,'Volver a Mi ruta'],crumbs:[['#ruta-'+c.id,'Mi ruta'],['#ruta-'+c.id,'Curso '+c.name],['','Módulo '+pos.i]],title:m.title,sub:esc(m.goal),act:'<a class="btn jade" href="'+nx.href+'">'+(nx.kind==='l'?nx.short+' con la lección '+nx.n:nx.short)+ic('i-next')+'</a>'});
+  var h=modRibbon(m,{})+pageHead({back:['#ruta-'+c.id,'Volver a Mi ruta'],crumbs:[['#ruta-'+c.id,'Mi ruta'],['#ruta-'+c.id,'Curso '+c.name],['','Módulo '+pos.i]],title:m.title,sub:esc(m.goal),act:'<a class="btn jade" href="'+nx.href+'">'+(nx.kind==='l'?nx.short+' con la lección '+nx.n:nx.short)+ic('i-next')+'</a>'});
   h+='<div class="mod-grid"><section class="panel" aria-labelledby="st-t"><div class="panel-h"><h2 id="st-t">Pasos del módulo</h2><span class="muted sm">'+done+' de '+m.lessons.length+' lecciones</span></div>'+stepList(m,'',false)+'</section>';
   h+='<aside class="panel side-info" aria-label="Datos del módulo"><dl class="kv"><div><dt>Curso</dt><dd>'+c.name+'</dd></div><div><dt>Módulo</dt><dd>'+pos.i+' de '+pos.n+'</dd></div><div><dt>Intensidad</dt><dd>'+m.hours+' horas</dd></div><div><dt>Tu plataforma</dt><dd>'+PL[PLAT].name+'</dd></div><div><dt>Mejor examen</dt><dd>'+(P.exams[m.id]?P.exams[m.id].best+' %':'Pendiente')+'</dd></div></dl></aside></div>';
   if(m.calculator)h+='<section class="panel block2">'+calcHTML()+'</section>';
   h+='<nav class="pager" aria-label="Otros módulos">'+(pos.prev?'<a class="pg prev" href="#m-'+pos.prev.id+'">'+ic('i-back')+'<span><small>Módulo anterior</small>'+esc(pos.prev.title)+'</span></a>':'<span></span>')+(pos.next?'<a class="pg nextp" href="#m-'+pos.next.id+'"><span><small>Módulo siguiente</small>'+esc(pos.next.title)+'</span>'+ic('i-next')+'</a>':'')+'</nav>';
-  app.innerHTML='<div class="page">'+h+'</div>';if(m.calculator)wireCalc();
+  app.innerHTML='<div class="page">'+h+'</div>';wireRib();renderTree();if(m.calculator)wireCalc();
 }
 
 /* ===== LESSON ===== */
@@ -1019,7 +1110,7 @@ function vLesson(id,n){
   var m=mod(id);if(!m)return vRoute();if(P.course!==m.course){P.course=m.course;persist()}n=parseInt(n,10);var l=m.lessons[n-1];if(!l)return vModule(id);var k=lkey(m,n),pr=l.practice,c=course(m.course),pos=modPos(m);
   var tasks=pr.tasks.concat(pr.plat&&pr.plat[PLAT]?pr.plat[PLAT]:[]),tk=k+':'+(pr.plat?PLAT:'all'),done=P.practice[tk]||[];
   var secs=[['s-esencial','Lo esencial'],['s-explica','Explicación']];if(l.plat)secs.push(['s-plat','En '+PL[PLAT].name]);if(l.videos.length||l.links.length)secs.push(['s-fuentes','Videos y fuentes']);secs.push(['practice','Práctica']);
-  var h=pageHead({back:['#m-'+m.id,'Volver al módulo'],crumbs:[['#ruta-'+c.id,'Mi ruta'],['#ruta-'+c.id,'Curso '+c.name],['#m-'+m.id,'Módulo '+pos.i],['','Lección '+n]],title:l.t,sub:'Lección '+n+' de '+m.lessons.length+' · '+esc(m.title),act:(canSpeak?'<button class="btn ghost sm" id="speak">'+ic('i-sound')+'<span>Escuchar</span></button>':'')});
+  var h=modRibbon(m,{lesson:n})+pageHead({back:['#m-'+m.id,'Volver al módulo'],crumbs:[['#ruta-'+c.id,'Mi ruta'],['#ruta-'+c.id,'Curso '+c.name],['#m-'+m.id,'Módulo '+pos.i],['','Lección '+n]],title:l.t,sub:'Lección '+n+' de '+m.lessons.length+' · '+esc(m.title),act:(canSpeak?'<button class="btn ghost sm" id="speak">'+ic('i-sound')+'<span>Escuchar</span></button>':'')});
   h+='<details class="m-outline"><summary>En este módulo · lección '+n+' de '+m.lessons.length+'</summary>'+stepList(m,'l'+n,true)+'</details>';
   h+='<nav class="secnav" aria-label="Partes de la lección">'+secs.map(function(s){return '<a href="#'+s[0]+'" data-jump="'+s[0]+'">'+s[1]+'</a>'}).join('')+'</nav>';
   var b='<section id="s-esencial" class="easy rv" aria-labelledby="h-es"><h2 id="h-es">Lo esencial</h2><ul>'+l.easy.map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ul></section>';
@@ -1040,7 +1131,7 @@ function vLesson(id,n){
   var prevH=n>1?'#l-'+m.id+'-'+(n-1):'#m-'+m.id,prevL=n>1?m.lessons[n-2].t:'Volver al módulo',nxtH=n<m.lessons.length?'#l-'+m.id+'-'+(n+1):'#ex-'+m.id,nxtL=n<m.lessons.length?m.lessons[n].t:'Examen del módulo';
   b+='<nav class="pager" aria-label="Lecciones"><a class="pg prev" href="'+prevH+'">'+ic('i-back')+'<span><small>'+(n>1?'Lección anterior':'Inicio del módulo')+'</small>'+esc(prevL)+'</span></a><a class="pg nextp" href="'+nxtH+'" id="nextBtn"><span><small>'+(n<m.lessons.length?'Lección siguiente':'Para terminar el módulo')+'</small>'+esc(nxtL)+'</span>'+ic('i-next')+'</a></nav>';
   h+='<div class="lesson-grid"><article class="lesson-main">'+b+'</article><aside class="lesson-rail" aria-label="Recorrido del módulo"><div class="rail-in"><p class="rail-k"><a href="#m-'+m.id+'">Módulo '+pos.i+': '+esc(m.title)+'</a></p><div class="prog"><i data-w="'+Math.round(lessonsDone(m)/m.lessons.length*100)+'%"></i></div><p class="muted sm" style="margin:6px 0 14px">'+lessonsDone(m)+' de '+m.lessons.length+' lecciones terminadas</p>'+stepList(m,'l'+n,true)+'<p class="rail-k" style="margin-top:22px">En esta lección</p><ul class="toc">'+secs.map(function(s){return '<li><a href="#'+s[0]+'" data-jump="'+s[0]+'">'+s[1]+'</a></li>'}).join('')+'</ul></div></aside></div>';
-  app.innerHTML='<div class="page">'+h+'</div>';wireCalc();
+  app.innerHTML='<div class="page">'+h+'</div>';wireRib();renderTree();wireCalc();
   [].forEach.call(app.querySelectorAll('[data-jump]'),function(a){a.addEventListener('click',function(e){e.preventDefault();var t=document.getElementById(a.dataset.jump);if(t){t.scrollIntoView({behavior:RM?'auto':'smooth',block:'start'});t.setAttribute('tabindex','-1');t.focus({preventScroll:true})}})});
   var pi=document.getElementById('platInline');if(pi)pi.addEventListener('change',function(){PLAT=pi.value;P.plat=PLAT;P.platChosen=true;persist();checkTrophies();renderSide('ruta');var y=window.scrollY;vLesson(id,n);window.scrollTo(0,y);animateIn()});
   var sp=document.getElementById('speak');if(sp)sp.addEventListener('click',function(){var pb=l.plat&&l.plat[PLAT],lab=sp.querySelector('span');speak(l.t+'. Lo esencial. '+l.easy.join(' ')+' '+l.body.join(' ')+' Paso a paso. '+(l.steps||[]).join('. ')+'. '+(pb?'En '+PL[PLAT].name+'. '+pb.body.join(' '):'')+' Práctica guiada. '+tasks.map(function(x){return typeof x==='string'?x:x.t+'. '+(x.go?'Abre '+x.go.replace(/^https?:\/\/(www\.)?/,'')+'. ':'')+x.s.join(' ')+' Listo cuando: '+x.ok}).join(' '),lab)});
@@ -1062,12 +1153,12 @@ function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(M
 function code(m){var s=(user?user.email:'anon')+m.id+Date.now(),h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return 'SM-'+m.id.toUpperCase()+'-'+h.toString(36).toUpperCase().slice(0,6)}
 function vExam(id){
   var m=mod(id);if(!m)return vRoute();var c=course(m.course),pos=modPos(m),qs=shuffle(m.exam.map(function(q,i){return {q:q,i:i}})),allL=lessonsDone(m)===m.lessons.length;
-  var h=pageHead({back:['#m-'+m.id,'Volver al módulo'],crumbs:[['#ruta-'+c.id,'Mi ruta'],['#ruta-'+c.id,'Curso '+c.name],['#m-'+m.id,'Módulo '+pos.i],['','Examen']],title:'Examen: '+m.title,sub:m.exam.length+' preguntas · sin tiempo límite · apruebas con 70 % y puedes repetirlo'});
+  var h=modRibbon(m,{exam:true,static:true})+pageHead({back:['#m-'+m.id,'Volver al módulo'],crumbs:[['#ruta-'+c.id,'Mi ruta'],['#ruta-'+c.id,'Curso '+c.name],['#m-'+m.id,'Módulo '+pos.i],['','Examen']],title:'Examen: '+m.title,sub:m.exam.length+' preguntas · sin tiempo límite · apruebas con 70 % y puedes repetirlo'});
   if(!allL)h+='<p class="note">Te faltan '+(m.lessons.length-lessonsDone(m))+' lecciones de este módulo. Puedes presentar el examen, pero te irá mejor si las terminas. <a href="'+modNext(m).href+'">Ir a la lección pendiente</a></p>';
   h+='<div class="exam-wrap"><form id="exam" novalidate>';
   qs.forEach(function(o,k){h+='<div class="q"><fieldset><legend>'+(k+1)+'. '+esc(o.q.q)+'</legend><div class="opts">'+o.q.o.map(function(op,j){return '<label class="check"><input type="radio" name="q'+o.i+'" value="'+j+'"><span>'+esc(op)+'</span></label>'}).join('')+'</div></fieldset><div class="fb" id="fb'+o.i+'" hidden></div></div>'});
   h+='<div class="exam-bar"><span id="exCount" aria-live="polite">Respondidas 0 de '+m.exam.length+'</span><p class="err" id="exErr" role="alert"></p><button class="btn jade" type="submit">Calificar</button></div></form><div id="result" tabindex="-1"></div></div>';
-  app.innerHTML='<div class="page narrow">'+h+'</div>';
+  app.innerHTML='<div class="page narrow">'+h+'</div>';wireRib();renderTree();
   var f=document.getElementById('exam');
   f.addEventListener('change',function(){var a=0;m.exam.forEach(function(q,i){if(f.querySelector('input[name=q'+i+']:checked'))a++});document.getElementById('exCount').textContent='Respondidas '+a+' de '+m.exam.length});
   f.addEventListener('submit',function(e){e.preventDefault();var ok=0,miss=0;
