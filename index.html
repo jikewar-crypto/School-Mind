@@ -632,6 +632,22 @@ a.r:hover>.ic{transform:translateX(3px);color:var(--ink)}
   .path li.here .r>.pill{display:inline-flex}
 }
 @media (prefers-reduced-motion:reduce){.side{transition:none}}
+.ptask{background:var(--night-2);border-radius:16px;padding:6px 6px 14px;transition:background-color .2s}
+.ptask .ptask-h{background:transparent!important;display:flex;gap:12px;align-items:flex-start;padding:12px 12px 4px}
+.ptask .ptask-h input{width:22px;height:22px;margin-top:2px;flex:none}
+.ptask .ptask-h small{display:block;color:var(--on-night);font-size:12px;font-weight:600;letter-spacing:.02em}
+.ptask .ptask-h b{display:block;font-size:var(--t-b);line-height:1.35}
+.ptask.is-done{background:var(--jade-deep)}
+.clicks{list-style:none;counter-reset:ck;margin:8px 12px 0 46px;padding:0;display:flex;flex-direction:column;gap:6px}
+.clicks li{counter-increment:ck;position:relative;padding-left:32px;font-size:var(--t-s);line-height:1.5;color:#E4ECE8}
+.clicks li::before{content:counter(ck);position:absolute;left:0;top:1px;width:22px;height:22px;border-radius:50%;background:var(--night-3);color:#fff;font-size:12px;font-weight:600;display:grid;place-items:center}
+.clicks li.go::before{background:var(--jade);color:var(--ink)}
+.clicks li.go span{color:#fff;font-weight:600}
+.clicks a{color:var(--jade);font-weight:600;overflow-wrap:anywhere}
+.ptask.is-done .clicks a,.ptask.is-done .pok b{color:#fff}
+.pok{margin:10px 12px 0 46px!important;padding:8px 12px;border-left:3px solid var(--jade);font-size:var(--t-s);color:#fff!important;background:rgba(255,255,255,.04);border-radius:0 8px 8px 0}
+.pok b{color:var(--jade)}
+@media (max-width:560px){.clicks,.pok{margin-left:12px!important}}
 </style>
 </head>
 <body class="m-land">
@@ -744,6 +760,7 @@ a.r:hover>.ic{transform:translateX(3px);color:var(--ink)}
 <script src="course-i.js"></script>
 <script src="course-a.js"></script>
 <script src="plat-live.js"></script>
+<script src="guides.js"></script>
 <script>
 (function(){
 'use strict';
@@ -765,6 +782,15 @@ function activity(){var t=today();if(P.days.indexOf(t)<0)P.days.push(t);persist(
 /* helpers */
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 function mod(id){for(var i=0;i<M.length;i++)if(M[i].id===id)return M[i];return null}
+function taskHTML(x,i,on){
+  if(typeof x==='string')return '<li><label class="check"><input type="checkbox" data-i="'+i+'"'+(on?' checked':'')+'><span>'+linkify(x)+'</span></label></li>';
+  var h='<li class="ptask'+(on?' is-done':'')+'"><label class="check ptask-h"><input type="checkbox" data-i="'+i+'"'+(on?' checked':'')+' aria-describedby="pk'+i+'"><span><small>Tarea '+(i+1)+'</small><b>'+esc(x.t)+'</b></span></label>';
+  h+='<ol class="clicks" id="pk'+i+'">';
+  if(x.go)h+='<li class="go"><span>Abre</span> <a href="'+x.go+'" target="_blank" rel="noopener">'+esc(x.go.replace(/^https?:\/\/(www\.)?/,'').replace(/\/$/,''))+'</a></li>';
+  h+=x.s.map(function(st){return '<li>'+linkify(st)+'</li>'}).join('')+'</ol>';
+  if(x.ok)h+='<p class="pok"><b>Listo cuando:</b> '+esc(x.ok)+'</p>';
+  return h+'</li>';
+}
 function linkify(t){return esc(t).replace(/https?:\/\/[^\s,)]+[^\s,.)]/g,function(u){return '<a href="'+u+'" target="_blank" rel="noopener">'+u.replace(/^https?:\/\/(www\.)?/,'').replace(/\/$/,'')+'</a>'})}
 function lkey(m,n){return m.id+'-'+n}
 function lessonsDone(m){var c=0;m.lessons.forEach(function(_,i){if(P.lessons[lkey(m,i+1)])c++});return c}
@@ -1006,7 +1032,7 @@ function vLesson(id,n){
   if(l.videos.length||links.length){b+='<section id="s-fuentes" class="lsec" aria-labelledby="h-fu"><h2 id="h-fu">Videos y fuentes</h2>';
     if(l.videos.length)b+='<div class="vids">'+l.videos.map(function(v){return '<a class="vid" href="'+v.url+'" target="_blank" rel="noopener"><span class="pl">'+svg('play')+'</span><span>'+esc(v.t)+'<small>YouTube · video público de terceros</small></span></a>'}).join('')+'</div>';
     if(links.length)b+='<ul class="links">'+links.map(function(v){return '<li><a href="'+v.url+'" target="_blank" rel="noopener">'+esc(v.t)+'</a></li>'}).join('')+'</ul>';b+='</section>'}
-  b+='<section class="practice" id="practice" aria-labelledby="h-pr"><div class="practice-top"><div><h2 id="h-pr">Práctica guiada</h2><p><b>Vas a aprender:</b> '+esc(pr.goal)+'</p>'+(pr.plat?'<p class="pplat">Pasos para '+PL[PLAT].name+'. Cambia de plataforma en el menú.</p>':'')+'</div></div><div class="pbar"><i id="pb"></i></div><ol class="ptasks">'+tasks.map(function(x,i){return '<li><label class="check"><input type="checkbox" data-i="'+i+'"'+(done[i]?' checked':'')+'><span>'+linkify(x)+'</span></label></li>'}).join('')+'</ol>'+
+  b+='<section class="practice" id="practice" aria-labelledby="h-pr"><div class="practice-top"><div><h2 id="h-pr">Práctica guiada</h2><p><b>Vas a aprender:</b> '+esc(pr.goal)+'</p>'+(pr.plat?'<p class="pplat">Pasos para '+PL[PLAT].name+'. Cambia de plataforma en el menú.</p>':'')+'</div></div><div class="pbar"><i id="pb"></i></div><ol class="ptasks">'+tasks.map(function(x,i){return taskHTML(x,i,done[i])}).join('')+'</ol>'+
     '<p class="deliver"><b>Debes tener al final:</b> '+esc(pr.deliver)+'</p><div class="pcheck"><h3>Comprueba lo que aprendiste</h3>'+pr.check.map(function(q,i){return '<fieldset class="pq" data-q="'+i+'"><legend>'+esc(q.q)+'</legend>'+q.o.map(function(o,j){return '<label class="check"><input type="radio" name="pc'+i+'" value="'+j+'"><span>'+esc(o)+'</span></label>'}).join('')+'<p class="pfb" aria-live="polite"></p></fieldset>'}).join('')+'<button type="button" class="btn ghost" id="pcheck">Comprobar</button></div>'+
     '<button class="btn jade" id="done" style="margin-top:22px;width:100%"></button><p class="status" id="doneMsg" role="status" style="color:var(--on-night);margin-top:10px"></p></section>';
   var prevH=n>1?'#l-'+m.id+'-'+(n-1):'#m-'+m.id,prevL=n>1?m.lessons[n-2].t:'Volver al módulo',nxtH=n<m.lessons.length?'#l-'+m.id+'-'+(n+1):'#ex-'+m.id,nxtL=n<m.lessons.length?m.lessons[n].t:'Examen del módulo';
@@ -1015,13 +1041,13 @@ function vLesson(id,n){
   app.innerHTML='<div class="page">'+h+'</div>';wireCalc();
   [].forEach.call(app.querySelectorAll('[data-jump]'),function(a){a.addEventListener('click',function(e){e.preventDefault();var t=document.getElementById(a.dataset.jump);if(t){t.scrollIntoView({behavior:RM?'auto':'smooth',block:'start'});t.setAttribute('tabindex','-1');t.focus({preventScroll:true})}})});
   var pi=document.getElementById('platInline');if(pi)pi.addEventListener('change',function(){PLAT=pi.value;P.plat=PLAT;P.platChosen=true;persist();checkTrophies();renderSide('ruta');var y=window.scrollY;vLesson(id,n);window.scrollTo(0,y);animateIn()});
-  var sp=document.getElementById('speak');if(sp)sp.addEventListener('click',function(){var pb=l.plat&&l.plat[PLAT],lab=sp.querySelector('span');speak(l.t+'. Lo esencial. '+l.easy.join(' ')+' '+l.body.join(' ')+' Paso a paso. '+(l.steps||[]).join('. ')+'. '+(pb?'En '+PL[PLAT].name+'. '+pb.body.join(' '):'')+' Práctica guiada. '+tasks.join(' '),lab)});
+  var sp=document.getElementById('speak');if(sp)sp.addEventListener('click',function(){var pb=l.plat&&l.plat[PLAT],lab=sp.querySelector('span');speak(l.t+'. Lo esencial. '+l.easy.join(' ')+' '+l.body.join(' ')+' Paso a paso. '+(l.steps||[]).join('. ')+'. '+(pb?'En '+PL[PLAT].name+'. '+pb.body.join(' '):'')+' Práctica guiada. '+tasks.map(function(x){return typeof x==='string'?x:x.t+'. '+(x.go?'Abre '+x.go.replace(/^https?:\/\/(www\.)?/,'')+'. ':'')+x.s.join(' ')+' Listo cuando: '+x.ok}).join(' '),lab)});
   var box=document.getElementById('practice'),btn=document.getElementById('done'),msg=document.getElementById('doneMsg'),pbar=document.getElementById('pb');
   P.checks=P.checks||{};
   function upd(){var arr=P.practice[tk]||[],cnt=tasks.filter(function(_,i){return arr[i]}).length,all=cnt===tasks.length,ok=!!P.checks[k],d=P.lessons[k];
     pbar.style.width=((cnt+(ok?1:0))/(tasks.length+1)*100)+'%';btn.disabled=!(all&&ok)&&!d;btn.textContent=d?'Lección terminada':'Marcar como terminada';
-    msg.textContent=d?'Guardado. Sigue con: '+nxtL+'.':(!all?'Haz y marca todos los pasos ('+cnt+' de '+tasks.length+').':(!ok?'Responde bien la comprobación para terminar.':'¡Listo! Ya puedes terminar la lección.'))}
-  box.addEventListener('change',function(e){if(e.target.dataset.i===undefined)return;var i=+e.target.dataset.i;P.practice[tk]=P.practice[tk]||[];P.practice[tk][i]=e.target.checked;persist();upd()});
+    msg.textContent=d?'Guardado. Sigue con: '+nxtL+'.':(!all?'Haz y marca todas las tareas ('+cnt+' de '+tasks.length+').':(!ok?'Responde bien la comprobación para terminar.':'¡Listo! Ya puedes terminar la lección.'))}
+  box.addEventListener('change',function(e){if(e.target.dataset.i===undefined)return;var i=+e.target.dataset.i;var li=e.target.closest('.ptask');if(li)li.classList.toggle('is-done',e.target.checked);P.practice[tk]=P.practice[tk]||[];P.practice[tk][i]=e.target.checked;persist();upd()});
   document.getElementById('pcheck').addEventListener('click',function(){var good=0;pr.check.forEach(function(q,i){var fs=box.querySelector('.pq[data-q="'+i+'"]'),r=fs.querySelector('input:checked'),fb=fs.querySelector('.pfb');
       if(!r){fb.className='pfb no';fb.textContent='Elige una respuesta.';return}var ok=+r.value===q.a;if(ok)good++;fb.className='pfb '+(ok?'ok':'no');fb.textContent=(ok?'Correcto. ':'Aún no. Revisa tu práctica y vuelve a intentar. ')+(ok?q.e:'')});
     if(good===pr.check.length){P.checks[k]=true;persist()}upd()});
