@@ -820,6 +820,8 @@ a.r:hover>.ic{transform:translateX(3px);color:var(--ink)}
 <script src="course-a.js"></script>
 <script src="plat-live.js"></script>
 <script src="guides.js"></script>
+<script src="explain.js"></script>
+<script src="ix.js"></script>
 <script src="tutor-config.js"></script>
 <script src="tutor.js"></script>
 <script>
@@ -1114,11 +1116,12 @@ function vLesson(id,n){
   h+='<details class="m-outline"><summary>En este módulo · lección '+n+' de '+m.lessons.length+'</summary>'+stepList(m,'l'+n,true)+'</details>';
   h+='<nav class="secnav" aria-label="Partes de la lección">'+secs.map(function(s){return '<a href="#'+s[0]+'" data-jump="'+s[0]+'">'+s[1]+'</a>'}).join('')+'</nav>';
   var b='<section id="s-esencial" class="easy rv" aria-labelledby="h-es"><h2 id="h-es">Lo esencial</h2><ul>'+l.easy.map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ul></section>';
-  b+='<section id="s-explica" class="lsec" aria-labelledby="h-ex"><h2 id="h-ex">Explicación</h2><div class="prose">'+l.body.map(function(x){return '<p>'+esc(x)+'</p>'}).join('')+'</div>';
+  var IXR=window.SM_IX?window.SM_IX.render(k,l):null;
+  b+='<section id="s-explica" class="lsec" aria-labelledby="h-ex"><h2 id="h-ex">Explicación</h2>'+(IXR?IXR.top:'<div class="prose">'+l.body.map(function(x){return '<p>'+esc(x)+'</p>'}).join('')+'</div>');
   if(l.steps&&l.steps.length)b+='<h3 class="sub-h">Paso a paso</h3><ol class="flow">'+l.steps.map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ol>';
   if(l.tip)b+='<div class="callout tip">'+svg('bulb')+'<p><b>Consejo:</b> '+esc(l.tip)+'</p></div>';
   if(l.warn)b+='<div class="callout warn">'+svg('alert')+'<p><b>Cuidado:</b> '+esc(l.warn)+'</p></div>';
-  b+='</section>';
+  b+=(IXR?IXR.blocks:'')+'</section>';
   if(m.calculator&&n===2)b+='<section class="lsec">'+calcHTML()+'</section>';
   if(l.plat){var pb=l.plat[PLAT];b+='<section id="s-plat" class="platbox lsec" aria-labelledby="h-pl"><div class="platbox-h"><h2 id="h-pl">Cómo se hace en '+PL[PLAT].name+'</h2><label class="plat-sel"><span>Ver en</span><select id="platInline">'+PO.map(function(x){return '<option value="'+x+'"'+(x===PLAT?' selected':'')+'>'+PL[x].name+'</option>'}).join('')+'</select></label></div>'+(pb?'<div class="prose">'+pb.body.map(function(x){return '<p>'+esc(x)+'</p>'}).join('')+'</div>'+(pb.steps?'<ol class="flow" style="margin-top:16px">'+pb.steps.map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ol>':'')+(pb.shots?'<div class="shots">'+pb.shots.map(function(s){return '<figure><a href="'+esc(s.src)+'" target="_blank" rel="noopener"><img src="'+esc(s.src)+'" alt="'+esc(s.cap)+'" loading="lazy"></a><figcaption>'+esc(s.cap)+'</figcaption></figure>'}).join('')+'</div>':''):'<p>Esta lección aplica igual en todas las plataformas.</p>')+'</section>'}
   var other=PO.filter(function(x){return x!==PLAT}),links=l.links.filter(function(x){return !l.plat||!other.some(function(o){return x.url.indexOf(o==='effi'?'effi':o)>=0})});if(l.plat)PL[PLAT].links.forEach(function(x){if(!links.some(function(y){return y.url===x.url}))links.push(x)});
@@ -1131,7 +1134,7 @@ function vLesson(id,n){
   var prevH=n>1?'#l-'+m.id+'-'+(n-1):'#m-'+m.id,prevL=n>1?m.lessons[n-2].t:'Volver al módulo',nxtH=n<m.lessons.length?'#l-'+m.id+'-'+(n+1):'#ex-'+m.id,nxtL=n<m.lessons.length?m.lessons[n].t:'Examen del módulo';
   b+='<nav class="pager" aria-label="Lecciones"><a class="pg prev" href="'+prevH+'">'+ic('i-back')+'<span><small>'+(n>1?'Lección anterior':'Inicio del módulo')+'</small>'+esc(prevL)+'</span></a><a class="pg nextp" href="'+nxtH+'" id="nextBtn"><span><small>'+(n<m.lessons.length?'Lección siguiente':'Para terminar el módulo')+'</small>'+esc(nxtL)+'</span>'+ic('i-next')+'</a></nav>';
   h+='<div class="lesson-grid"><article class="lesson-main">'+b+'</article><aside class="lesson-rail" aria-label="Recorrido del módulo"><div class="rail-in"><p class="rail-k"><a href="#m-'+m.id+'">Módulo '+pos.i+': '+esc(m.title)+'</a></p><div class="prog"><i data-w="'+Math.round(lessonsDone(m)/m.lessons.length*100)+'%"></i></div><p class="muted sm" style="margin:6px 0 14px">'+lessonsDone(m)+' de '+m.lessons.length+' lecciones terminadas</p>'+stepList(m,'l'+n,true)+'<p class="rail-k" style="margin-top:22px">En esta lección</p><ul class="toc">'+secs.map(function(s){return '<li><a href="#'+s[0]+'" data-jump="'+s[0]+'">'+s[1]+'</a></li>'}).join('')+'</ul></div></aside></div>';
-  app.innerHTML='<div class="page">'+h+'</div>';wireRib();renderTree();wireCalc();
+  app.innerHTML='<div class="page">'+h+'</div>';wireRib();renderTree();wireCalc();if(window.SM_IX)window.SM_IX.wire(app);
   [].forEach.call(app.querySelectorAll('[data-jump]'),function(a){a.addEventListener('click',function(e){e.preventDefault();var t=document.getElementById(a.dataset.jump);if(t){t.scrollIntoView({behavior:RM?'auto':'smooth',block:'start'});t.setAttribute('tabindex','-1');t.focus({preventScroll:true})}})});
   var pi=document.getElementById('platInline');if(pi)pi.addEventListener('change',function(){PLAT=pi.value;P.plat=PLAT;P.platChosen=true;persist();checkTrophies();renderSide('ruta');var y=window.scrollY;vLesson(id,n);window.scrollTo(0,y);animateIn()});
   var sp=document.getElementById('speak');if(sp)sp.addEventListener('click',function(){var pb=l.plat&&l.plat[PLAT],lab=sp.querySelector('span');speak(l.t+'. Lo esencial. '+l.easy.join(' ')+' '+l.body.join(' ')+' Paso a paso. '+(l.steps||[]).join('. ')+'. '+(pb?'En '+PL[PLAT].name+'. '+pb.body.join(' '):'')+' Práctica guiada. '+tasks.map(function(x){return typeof x==='string'?x:x.t+'. '+(x.go?'Abre '+x.go.replace(/^https?:\/\/(www\.)?/,'')+'. ':'')+x.s.join(' ')+' Listo cuando: '+x.ok}).join(' '),lab)});
